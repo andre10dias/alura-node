@@ -13,6 +13,23 @@ class LivroController {
         };
     }
 
+    static listarLivrosPorEditora = async (req, res) => {
+        var retorno = undefined;
+        try {
+            const editora = req.query.editora;
+            retorno = await livros.find({'editora': editora}).populate('autor');
+            res.status(200).json(retorno);
+        } catch(err) {
+            if (retorno == undefined) {
+                return res.status(400).json({err: 'Livro não encontrado.'});
+            }
+
+            res.status(500).json({
+                error: 'Falha ao buscar livro.'
+            });
+        };
+    }
+
     static listarLivrosPorId = async (req, res) => {
         var retorno = undefined;
         try {
