@@ -6,48 +6,29 @@ class LivroController {
             const retorno = await livros.find().populate('autor');
             res.status(200).json(retorno);
         } catch(err) {
-            console.error(err);
             res.status(500).json({
-                error: 'Falha ao buscar os livros.'
+                message: 'Falha ao buscar os livros.'
             });
         };
     }
 
     static listarLivrosPorEditora = async (req, res) => {
-        var retorno = undefined;
         try {
             const editora = req.query.editora;
-            retorno = await livros.find({'editora': editora}).populate('autor');
+            const retorno = await livros.find({'editora': editora}).populate('autor');
             res.status(200).json(retorno);
         } catch(err) {
-            if (retorno == undefined) {
-                return res.status(400).json({err: 'Livro não encontrado.'});
-            }
-
-            res.status(500).json({
-                error: 'Falha ao buscar livro.'
-            });
+            res.status(400).json({message: `${err.message} - Livro não encontrado.`});
         };
     }
 
     static listarLivrosPorId = async (req, res) => {
-        var retorno = undefined;
         try {
             const {id} = req.params;
-            retorno = await livros.findById(id).populate('autor');
+            const retorno = await livros.findById(id).populate('autor');
             res.status(200).json(retorno);
         } catch(err) {
-            console.error(err);
-            // if (err instanceof Error.CastError) {
-            //     return res.status(400).json({err: 'Livro não encontrado.'});
-            // }
-            if (retorno == undefined) {
-                return res.status(400).json({err: 'Livro não encontrado.'});
-            }
-
-            res.status(500).json({
-                error: 'Falha ao buscar livro.'
-            });
+            res.status(400).send({message: `${err.message} - Livro não encontrado.`});
         };
     }
 
@@ -57,7 +38,6 @@ class LivroController {
             await livro.save();
             res.status(201).send(livro.toJSON());
         } catch(err) {
-            console.error(err);
             res.status(501).send({
                 message: `${err.message} - Falha ao cadastrar livro.`
             });
@@ -83,7 +63,6 @@ class LivroController {
             const retorno = await livros.findByIdAndDelete(id, req.body, {new: true});
             res.status(200).json(retorno);
         } catch(err) {
-            console.error(err);
             res.status(500).send({
                 message: `${err.message} - Falha ao excluir livro.`
             });
