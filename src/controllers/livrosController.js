@@ -1,71 +1,78 @@
 import livros from "../models/Livro.js";
+import NaoEncontrado from "../erros/NaoEncontrado.js";
 
 class LivroController {
-    static listarLivros = async (req, res) => {
+    static listarLivros = async (req, res, next) => {
         try {
             const retorno = await livros.find().populate('autor');
             res.status(200).json(retorno);
         } catch(err) {
-            res.status(500).json({
-                message: 'Falha ao buscar os livros.'
-            });
+            next(err);
         };
     }
 
-    static listarLivrosPorEditora = async (req, res) => {
+    static listarLivrosPorEditora = async (req, res, next) => {
         try {
             const editora = req.query.editora;
             const retorno = await livros.find({'editora': editora}).populate('autor');
             res.status(200).json(retorno);
         } catch(err) {
-            res.status(400).json({message: `${err.message} - Livro não encontrado.`});
+            next(err);
         };
     }
 
-    static listarLivrosPorId = async (req, res) => {
+    static listarLivrosPorId = async (req, res, next) => {
         try {
             const {id} = req.params;
             const retorno = await livros.findById(id).populate('autor');
-            res.status(200).json(retorno);
+
+            if (retorno !== null) {
+                res.status(200).json(retorno);
+            } else {
+                next(new NaoEncontrado('Livro não localizado.'));
+            }
         } catch(err) {
-            res.status(400).send({message: `${err.message} - Livro não encontrado.`});
+            next(err);
         };
     }
 
-    static cadastrarLivro = async (req, res) => {
+    static cadastrarLivro = async (req, res, next) => {
         try {
             const livro = new livros(req.body);
             await livro.save();
             res.status(201).send(livro.toJSON());
         } catch(err) {
-            res.status(501).send({
-                message: `${err.message} - Falha ao cadastrar livro.`
-            });
+            next(err);
         };
     }
 
-    static atualizarLivro = async (req, res) => {
+    static atualizarLivro = async (req, res, next) => {
         try {
             const {id} = req.params;
             const retorno = await livros.findByIdAndUpdate(id, req.body, {new: true});
-            res.status(200).json(retorno);
+            
+            if (retorno !== null) {
+                res.status(200).json(retorno);
+            } else {
+                next(new NaoEncontrado('Livro não localizado.'));
+            }
         } catch(err) {
-            console.error(err);
-            res.status(500).send({
-                message: `${err.message} - Falha ao atualizar livro.`
-            });
+            next(err);
         };
     }
 
-    static deletarLivros = async (req, res) => {
+    static deletarLivros = async (req, res, next) => {
         try {
             const {id} = req.params;
             const retorno = await livros.findByIdAndDelete(id, req.body, {new: true});
-            res.status(200).json(retorno);
+            
+            if (retorno !== null) {
+                res.status(200).json(retorno);
+            } else {
+                next(new NaoEncontrado('Livro não localizado.'));
+            }
         } catch(err) {
-            res.status(500).send({
-                message: `${err.message} - Falha ao excluir livro.`
-            });
+            next(err);
         };
     }
 }
