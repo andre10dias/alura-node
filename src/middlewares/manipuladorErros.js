@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import ErroBase from "../erros/ErroBase.js";
 import RequisicaoIncorreta from "../erros/RequisicaoIncorreta.js";
 import ErroValidacao from "../erros/ErroValidacao.js";
-import NaoEncontrado from "../erros/NaoEncontrado.js";
+// import NaoEncontrado from "../erros/NaoEncontrado.js";
 
 //Middleawarer de erros
 function manipuladorErros (erro, req, res, next) {
@@ -10,7 +10,8 @@ function manipuladorErros (erro, req, res, next) {
       new RequisicaoIncorreta().enviarResposta(res);
     } else if (erro instanceof mongoose.Error.ValidationError) {
       new ErroValidacao(erro).enviarResposta(res);
-    } else if (erro instanceof NaoEncontrado) {
+    // } else if (erro instanceof NaoEncontrado) {
+    } else if (erro instanceof ErroBase) {
       erro.enviarResposta(res);
     } else {
       new ErroBase().enviarResposta(res);
