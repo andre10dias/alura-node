@@ -22,9 +22,11 @@ class LivroController {
     //     };
     // }
 
+    //Usando regex para consulta por filtro digitando apenas parte to parâmetro
     static listarLivrosPorFiltro = async (req, res, next) => {
         try {
             const {editora, titulo} = req.query;
+            // const regex = new RegExp(titulo, "i");
 
             //obriga passa os dois parâmetros na url
             // const retorno = await livros.find({
@@ -39,7 +41,8 @@ class LivroController {
             }
 
             if (titulo) {
-                busca.titulo = titulo;
+                // busca.titulo = regex;
+                busca.titulo = { $regex: titulo, $options: "i" }; //Outra forma de usar o regex
             }
 
             const retorno = await livros.find(busca)
