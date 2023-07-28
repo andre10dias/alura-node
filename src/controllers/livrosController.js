@@ -1,5 +1,5 @@
 // import livros from "../models/Livro.js";
-import { livros } from "../models/index.js"; //validador global
+import { autores, livros } from "../models/index.js"; //validador global
 import NaoEncontrado from "../erros/NaoEncontrado.js";
 
 class LivroController {
@@ -25,12 +25,14 @@ class LivroController {
     //Usando regex para consulta por filtro digitando apenas parte to parâmetro
     static listarLivrosPorFiltro = async (req, res, next) => {
         try {
-            const busca = processaBusca(req.query);
-
-            const retorno = await livros.find(busca)
-                .populate('autor');
-
-            res.status(200).json(retorno);
+            const busca = await processaBusca(req.query);
+            if (busca != null) {
+                const retorno = await livros.find(busca).populate('autor');
+                res.status(200).json(retorno);
+            }
+            else {
+                res.status(200).send([]);
+            }
         } catch(err) {
             next(err);
         };
@@ -93,8 +95,8 @@ class LivroController {
 }
 
 //Função criada fora da classe para que ela não seja exportada
-function processaBusca(params) {
-    const {editora, titulo, minPaginas, maxPaginas} = params;
+async function processaBusca(params) {
+    const {editora, titulo, minPaginas, maxPaginas, nomeAutor} = params;
     // const regex = new RegExp(titulo, "i");
 
     //obriga passa os dois parâmetros na url
@@ -104,7 +106,8 @@ function processaBusca(params) {
     // }).populate('autor');
 
     //pode passar um ou ambos os parâmetros na url
-    const busca = {};
+    let busca = {};
+
     if (editora) {
         busca.editora = editora;
     }
@@ -128,6 +131,19 @@ function processaBusca(params) {
     if (maxPaginas) {
         // busca.numeroPaginas = { $lte: maxPaginas};
         busca.numeroPaginas.$lte = maxPaginas; // Uma forma melhor de codificar para um objeto não sobreescrever o outro
+    }
+
+    if (nomeAutor) {
+        const autor = await autores.findOne({ nome: nomeAutor });
+
+        if (autor !== null) {
+            const autorId = autor._id;
+            busca.autor = autorId;
+        }
+        else {
+            busca = null;
+        }
+
     }
 
     return busca;
