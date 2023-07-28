@@ -1,4 +1,5 @@
-import livros from "../models/Livro.js";
+// import livros from "../models/Livro.js";
+import { livros } from "../models/index.js"; //validador global
 import NaoEncontrado from "../erros/NaoEncontrado.js";
 
 class LivroController {
