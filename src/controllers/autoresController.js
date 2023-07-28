@@ -5,10 +5,13 @@ import { autores } from "../models/index.js"; //validador global
 class AutorController {
     static listarAutores = async (req, res, next) => {
         try {
-            const retorno = await autores.find();
+            // const retorno = await autores.find();
+            const retorno = autores.find();
+            req.resultado = retorno;
 
             if (retorno !== null) {
-                res.status(200).json(retorno);
+                // res.status(200).json(retorno);
+                next();
             } else {
                 res.status(200).send({message: 'Não existem autores cadastrados.'});
             }
