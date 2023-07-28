@@ -12,10 +12,39 @@ class LivroController {
         };
     }
 
-    static listarLivrosPorEditora = async (req, res, next) => {
+    // static listarLivrosPorEditora = async (req, res, next) => {
+    //     try {
+    //         const editora = req.query.editora;
+    //         const retorno = await livros.find({'editora': editora}).populate('autor');
+    //         res.status(200).json(retorno);
+    //     } catch(err) {
+    //         next(err);
+    //     };
+    // }
+
+    static listarLivrosPorFiltro = async (req, res, next) => {
         try {
-            const editora = req.query.editora;
-            const retorno = await livros.find({'editora': editora}).populate('autor');
+            const {editora, titulo} = req.query;
+
+            //obriga passa os dois parâmetros na url
+            // const retorno = await livros.find({
+            //     editora: editora,
+            //     titulo: titulo
+            // }).populate('autor');
+
+            //pode passar um ou ambos os parâmetros na url
+            const busca = {};
+            if (editora) {
+                busca.editora = editora;
+            }
+
+            if (titulo) {
+                busca.titulo = titulo;
+            }
+
+            const retorno = await livros.find(busca)
+                .populate('autor');
+
             res.status(200).json(retorno);
         } catch(err) {
             next(err);
