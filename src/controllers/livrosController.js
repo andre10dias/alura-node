@@ -25,25 +25,7 @@ class LivroController {
     //Usando regex para consulta por filtro digitando apenas parte to parâmetro
     static listarLivrosPorFiltro = async (req, res, next) => {
         try {
-            const {editora, titulo} = req.query;
-            // const regex = new RegExp(titulo, "i");
-
-            //obriga passa os dois parâmetros na url
-            // const retorno = await livros.find({
-            //     editora: editora,
-            //     titulo: titulo
-            // }).populate('autor');
-
-            //pode passar um ou ambos os parâmetros na url
-            const busca = {};
-            if (editora) {
-                busca.editora = editora;
-            }
-
-            if (titulo) {
-                // busca.titulo = regex;
-                busca.titulo = { $regex: titulo, $options: "i" }; //Outra forma de usar o regex
-            }
+            const busca = processaBusca(req.query);
 
             const retorno = await livros.find(busca)
                 .populate('autor');
@@ -108,6 +90,47 @@ class LivroController {
             next(err);
         };
     }
+}
+
+//Função criada fora da classe para que ela não seja exportada
+function processaBusca(params) {
+    const {editora, titulo, minPaginas, maxPaginas} = params;
+    // const regex = new RegExp(titulo, "i");
+
+    //obriga passa os dois parâmetros na url
+    // const retorno = await livros.find({
+    //     editora: editora,
+    //     titulo: titulo
+    // }).populate('autor');
+
+    //pode passar um ou ambos os parâmetros na url
+    const busca = {};
+    if (editora) {
+        busca.editora = editora;
+    }
+
+    if (titulo) {
+        // busca.titulo = regex;
+        busca.titulo = { $regex: titulo, $options: "i" }; //Outra forma de usar o regex
+    }
+
+    if (minPaginas || maxPaginas) {
+        busca.numeroPaginas = {};
+    }
+
+    // gte -> Maior ou igual a
+    if (minPaginas) {
+        // busca.numeroPaginas = { $gte: minPaginas};
+        busca.numeroPaginas.$gte = minPaginas; // Uma forma melhor de codificar para um objeto não sobreescrever o outro
+    }
+
+    // lte -> Menor ou igual a
+    if (maxPaginas) {
+        // busca.numeroPaginas = { $lte: maxPaginas};
+        busca.numeroPaginas.$lte = maxPaginas; // Uma forma melhor de codificar para um objeto não sobreescrever o outro
+    }
+
+    return busca;
 }
 
 export default LivroController;
